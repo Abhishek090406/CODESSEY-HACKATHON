@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AetherHealth | Connection Health Reporting SaaS</title>
+  <meta name="description" content="Autonomous connection health reporting, deterministic validation, and pure classification engine for distributed cloud services.">
+  
+  <!-- Modern Typography: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-apple-light">
+
+  <!-- Apple-Style Translucent Top Navigation Bar -->
+  <header class="apple-navbar">
+    <div class="nav-container">
+      <!-- Brand Logo -->
+      <a href="#" class="brand-link" onclick="handleBrandClick(); return false;">
+        <div class="brand-glyph">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">AetherHealth</span>
+          <span class="brand-pill" id="brandConsoleTag" style="display: none;">CONSOLE</span>
+        </div>
+      </a>
+
+      <!-- 1. PUBLIC Navigation Links (Visible when on landing page / logged out) -->
+      <nav class="nav-links-clean" id="publicNavLinks">
+        <a href="#sectionLanding" class="apple-nav-item active" onclick="smoothScrollTo('sectionLanding', event)">Overview</a>
+        <a href="#problemSection" class="apple-nav-item" onclick="smoothScrollTo('problemSection', event)">Why AetherHealth</a>
+        <a href="#simulator" class="apple-nav-item" onclick="smoothScrollTo('simulator', event)">Simulator</a>
+        <a href="#howItWorksSection" class="apple-nav-item" onclick="smoothScrollTo('howItWorksSection', event)">Workflow</a>
+        <a href="#subscriptions" class="apple-nav-item" onclick="smoothScrollTo('subscriptions', event)">Pricing &amp; Plans</a>
+      </nav>
+
+      <!-- 2. AUTHENTICATED App Navigation Links (Visible only after login) -->
+      <nav class="nav-links-clean" id="authNavLinks" style="display: none;">
+        <button type="button" class="apple-nav-item active" id="tabConsole" onclick="navigateTo('console')">Console</button>
+        <button type="button" class="apple-nav-item" id="tabAnalytics" onclick="navigateTo('analytics')">Live Analytics</button>
+        <button type="button" class="apple-nav-item" id="tabHistory" onclick="navigateTo('history')">Audit Vault</button>
+        <button type="button" class="apple-nav-item" id="tabProfile" onclick="navigateTo('profile')">Profile &amp; Quotas</button>
+      </nav>
+
+      <!-- 3. PUBLIC Right Actions: Sign In, Register -->
+      <div class="nav-actions-group" id="publicNavActions">
+        <button type="button" class="apple-btn-ghost" onclick="openAuthModal('signin')">
+          Sign In
+        </button>
+        <button type="button" class="apple-btn-primary" onclick="openAuthModal('register')">
+          Register
+        </button>
+      </div>
+
+      <!-- 4. AUTHENTICATED Right Actions (DB Status, Quota, Account, Sign Out) -->
+      <div class="nav-actions-group" id="authNavActions" style="display: none;">
+        <!-- Live DB Status Chip -->
+        <button type="button" class="apple-status-chip" id="btnDbStatus" onclick="openDbModal()" title="View Database Diagnostics">
+          <span class="apple-dot green pulse"></span>
+          <span class="chip-text" id="dbHudVal">SQLite WAL • 0.03ms</span>
+        </button>
+
+        <!-- Quota Pill -->
+        <div class="apple-quota-chip" title="Remaining Daily Quota">
+          <div class="quota-ring-mini">
+            <svg width="16" height="16" viewBox="0 0 36 36">
+              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path id="quotaCircle" class="circle-progress" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+          </div>
+          <span id="quotaValue">10 / 10 Runs</span>
+        </div>
+
+        <!-- Tenant Account Switcher -->
+        <button type="button" class="apple-account-btn" onclick="navigateTo('profile')" title="View Active Tenant Profile">
+          <div class="account-avatar" id="userAvatar">OP</div>
+          <div class="account-label">
+            <span class="account-company" id="navCompany">Acme Cloud</span>
+            <span class="account-role-tag pro" id="navRolePill">Pro • Operator</span>
+          </div>
+        </button>
+
+        <!-- Sign Out Button -->
+        <button type="button" class="apple-btn-secondary" onclick="logout()" title="Sign Out of Session">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       PAGE 1: Apple-Style Landing Page (Active by default!)
+       ========================================================================= -->
+  <main id="sectionLanding" class="view-section active">
+    <!-- Hero Section -->
+    <section class="apple-hero-section">
+      <div class="hero-container">
+        <!-- Giant Apple Headline -->
+        <h1 class="apple-hero-headline">
+          Every cloud connection. <br>
+          <span class="apple-gradient-text">Graded, validated, and protected in real time.</span>
+        </h1>
+
+        <!-- Plain-English Subtitle -->
+        <p class="apple-hero-subhead">
+          Your cloud applications talk to hundreds of APIs, databases, and microservices every minute. 
+          When an endpoint slows down or fails, <strong>AetherHealth</strong> inspects your connection health logs, 
+          flags slow calls before they breach a 1000ms SLA, stops corrupted records at the door, and protects your cloud budget with zero duplicate charges.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="apple-hero-ctas">
+          <a href="#simulator" class="apple-btn-hero-primary" onclick="smoothScrollTo('simulator', event)">
+            Try Live Simulator ↓
+          </a>
+          <a href="#howToDemo" class="apple-btn-hero-secondary" onclick="smoothScrollTo('howToDemo', event)">
+            How to Demo (3 Steps) ↓
+          </a>
+          <a href="#subscriptions" class="apple-btn-hero-secondary" onclick="smoothScrollTo('subscriptions', event)">
+            View Plans &amp; Pricing ↓
+          </a>
+        </div>
+
+        <!-- High-Performance Architecture Pipeline Strip -->
+        <div class="telemetry-pipeline-strip">
+          <div class="pipeline-node">
+            <div class="pipeline-node-badge">STEP 1 &bull; INGESTION</div>
+            <div class="pipeline-node-title">Batch Telemetry Ingestion</div>
+            <div class="pipeline-node-spec">JSON &bull; CSV &bull; REST API</div>
+          </div>
+          <div class="pipeline-connector">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="pipeline-node">
+            <div class="pipeline-node-badge green">STEP 2 &bull; INTEGRITY</div>
+            <div class="pipeline-node-title">Rules R1&ndash;R4 Quality Gate</div>
+            <div class="pipeline-node-spec">Line-Item Syntax &bull; Zero Corrupt Data</div>
+          </div>
+          <div class="pipeline-connector">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="pipeline-node">
+            <div class="pipeline-node-badge amber">STEP 3 &bull; SLA CLASSIFIER</div>
+            <div class="pipeline-node-title">1000ms SLA Engine</div>
+            <div class="pipeline-node-spec">5 Telemetry States &bull; Pure Function</div>
+          </div>
+          <div class="pipeline-connector">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div class="pipeline-node">
+            <div class="pipeline-node-badge purple">STEP 4 &bull; AUDIT VAULT</div>
+            <div class="pipeline-node-title">Atomic Quota Vault</div>
+            <div class="pipeline-node-spec">SQLite WAL &bull; SHA-256 Deduplication</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION: The 30-Second Story (Why Does This Project Exist?)
+         ========================================================================= -->
+    <section class="apple-comparison-section" id="problemSection">
+      <div class="section-container">
+        <div class="section-header-center">
+          <span class="apple-subheading-tag">THE 30-SECOND STORY</span>
+          <h2 class="apple-section-title">Why does AetherHealth exist?</h2>
+          <p class="apple-section-desc">Traditional monitoring misses silent latency degradation and double-bills for retries. Here is how we fix it.</p>
+        </div>
+
+        <div class="comparison-grid">
+          <!-- Card 1: The Problem -->
+          <div class="comparison-card problem">
+            <div class="comparison-header">
+              <span class="comparison-title">Without AetherHealth</span>
+              <span class="comparison-tag">THE NIGHTMARE</span>
+            </div>
+            <p class="comparison-subtitle">What happens to unmonitored cloud services:</p>
+
+            <ul class="comparison-items">
+              <li class="comparison-item">
+                <div class="item-icon-circle">✕</div>
+                <div class="item-body">
+                  <span class="item-title">Silent Microservice Slowness</span>
+                  <span class="item-desc">An endpoint takes 1,400ms to reply. It doesn't throw a 500 error, but customers get frustrated by loading spinners and abandon their carts.</span>
+                </div>
+              </li>
+              <li class="comparison-item">
+                <div class="item-icon-circle">✕</div>
+                <div class="item-body">
+                  <span class="item-title">Garbage Telemetry Logs</span>
+                  <span class="item-desc">Services send negative latencies, duplicate request IDs, or blank HTTP codes. Corrupted data pollutes dashboards and downstream databases.</span>
+                </div>
+              </li>
+              <li class="comparison-item">
+                <div class="item-icon-circle">✕</div>
+                <div class="item-body">
+                  <span class="item-title">Paying Twice for Retries</span>
+                  <span class="item-desc">When a network glitch triggers a retry, standard platforms count both requests and bill you double your quota allowance.</span>
+                </div>
+              </li>
+              <li class="comparison-item">
+                <div class="item-icon-circle">✕</div>
+                <div class="item-body">
+                  <span class="item-title">Race-Condition Overages</span>
+                  <span class="item-desc">Under sudden peak traffic, multiple workers claim the last free request slot at the exact same millisecond, blowing past daily limits.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Card 2: The Solution -->
+          <div class="comparison-card solution">
+            <div class="comparison-header">
+              <span class="comparison-title">With AetherHealth</span>
+              <span class="comparison-tag">THE PEACE OF MIND</span>
+            </div>
+            <p class="comparison-subtitle">Automated, deterministic protection for your microservices:</p>
+
+            <ul class="comparison-items">
+              <li class="comparison-item">
+                <div class="item-icon-circle">✓</div>
+                <div class="item-body">
+                  <span class="item-title">Real-Time 1000ms SLA Alerting</span>
+                  <span class="item-desc">Every connection is graded in microseconds: <strong>HEALTHY</strong> (&le;1000ms), <strong>SLOW</strong> (&gt;1000ms SLA breach), <strong>TIMEOUT</strong> (504), or <strong>RATE LIMITED</strong> (429).</span>
+                </div>
+              </li>
+              <li class="comparison-item">
+                <div class="item-icon-circle">✓</div>
+                <div class="item-body">
+                  <span class="item-title">Pre-Flight Quality Gate (R1–R4)</span>
+                  <span class="item-desc">Stops corrupted logs before they touch your database. Pinpoints the exact line number, field name, and rule violation deterministically.</span>
+                </div>
+              </li>
+              <li class="comparison-item">
+                <div class="item-icon-circle">✓</div>
+                <div class="item-body">
+                  <span class="item-title">0-Quota Replay Immunity</span>
+                  <span class="item-desc">Cryptographic SHA-256 fingerprinting detects retried requests instantly, returning cached responses with <strong>zero quota deducted</strong>.</span>
+                </div>
+              </li>
+              <li class="comparison-item">
+                <div class="item-icon-circle">✓</div>
+                <div class="item-body">
+                  <span class="item-title">Atomic Single-Statement SQL Locks</span>
+                  <span class="item-desc">Strict SQLite WAL atomic transactions guarantee daily limits are enforced without crashes or race conditions, even under 100 concurrent workers.</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION: Interactive Telemetry Simulator
+         ========================================================================= -->
+    <section class="apple-bento-section" id="simulator">
+      <div class="section-container">
+        <div class="section-header-center">
+          <span class="apple-subheading-tag">INTERACTIVE PLAYGROUND</span>
+          <h2 class="apple-section-title">Test the health engine live.</h2>
+          <p class="apple-section-desc">Drag the slider or click presets to see how AetherHealth classifies connection performance in real-time (Zero quota consumed).</p>
+        </div>
+
+        <!-- Floating Apple macOS Product Window Mockup -->
+        <div class="apple-device-frame">
+          <div class="window-titlebar">
+            <div class="window-traffic-lights">
+              <span class="dot-traffic red"></span>
+              <span class="dot-traffic yellow"></span>
+              <span class="dot-traffic green"></span>
+            </div>
+            <div class="window-title">AetherHealth Engine — Live Sandbox Simulator</div>
+            <div class="window-status-badge">REVISION 2 PURE CLASSIFIER</div>
+          </div>
+
+          <!-- Inside Window: Interactive Simulator -->
+          <div class="window-content">
+            <!-- Quick Benchmark Test Pills -->
+            <div class="sim-pills-row">
+              <button type="button" class="apple-sim-pill ultra" onclick="runSimUltraBurst(this)" style="border-color: rgba(175, 82, 222, 0.4); background: rgba(175, 82, 222, 0.08); color: #af52de;">
+                <span class="apple-dot" style="background: #af52de;"></span>
+                <span>100-Request Ultra Burst (No Limits)</span>
+              </button>
+              <button type="button" class="apple-sim-pill active" onclick="runSimTest(200, 80, 'TEST', this)">
+                <span class="apple-dot green"></span>
+                <span>200 OK • 80ms (Fast)</span>
+              </button>
+              <button type="button" class="apple-sim-pill" onclick="runSimTest(200, 1420, 'STAGE', this)">
+                <span class="apple-dot amber"></span>
+                <span>200 OK • 1420ms (SLA Breach)</span>
+              </button>
+              <button type="button" class="apple-sim-pill" onclick="runSimTest(504, 3000, 'STAGE', this)">
+                <span class="apple-dot red"></span>
+                <span>504 Gateway Timeout (3000ms)</span>
+              </button>
+              <button type="button" class="apple-sim-pill" onclick="runSimTest(429, 210, 'TEST', this)">
+                <span class="apple-dot blue"></span>
+                <span>429 Rate Limited</span>
+              </button>
+              <button type="button" class="apple-sim-pill" onclick="runSimTest(401, 45, 'TEST', this)">
+                <span class="apple-dot purple"></span>
+                <span>401 Unauthorized</span>
+              </button>
+            </div>
+
+            <!-- Live Output Display Card -->
+            <div class="sim-results-card">
+              <div class="sim-stats-grid">
+                <div class="sim-stat-box">
+                  <span class="stat-label">RECORD ID</span>
+                  <span class="stat-value" id="simRecordId">SIM-01</span>
+                </div>
+                <div class="sim-stat-box">
+                  <span class="stat-label">STATUS CODE</span>
+                  <span class="stat-value" id="simStatusCode">200 OK</span>
+                </div>
+                <div class="sim-stat-box">
+                  <span class="stat-label">MEASURED LATENCY</span>
+                  <span class="stat-value" id="simLatency">80 ms</span>
+                </div>
+                <div class="sim-stat-box">
+                  <span class="stat-label">HEALTH CLASSIFICATION</span>
+                  <span class="apple-status-tag healthy" id="simClassificationBadge">HEALTHY</span>
+                </div>
+              </div>
+
+              <!-- Latency SLA Gauge -->
+              <div class="sim-gauge-wrapper">
+                <div class="gauge-labels">
+                  <span>0 ms</span>
+                  <span class="gauge-sla-target" id="simSlaIndicator">✓ SLA Passed (&lt; 1000ms)</span>
+                  <span>3000 ms</span>
+                </div>
+                <div class="gauge-track">
+                  <div class="gauge-fill healthy" id="simBarFill" style="width: 8%;"></div>
+                  <div class="gauge-sla-line" title="1000ms SLA Threshold"></div>
+                </div>
+              </div>
+
+              <!-- Live Interactive Controls -->
+              <div class="sim-interactive-controls">
+                <div class="sim-control-item">
+                  <div class="sim-control-label">
+                    <span>Scrub Latency:</span>
+                    <strong id="simSliderVal" class="sim-value-callout">80 ms</strong>
+                  </div>
+                  <input type="range" id="simLatencySlider" min="10" max="3000" step="10" value="80" 
+                         class="apple-range-slider" oninput="onSimSliderInput(this.value)">
+                </div>
+                <div class="sim-control-item compact">
+                  <div class="sim-control-label">
+                    <span>HTTP Code:</span>
+                  </div>
+                  <select id="simCodeSelect" class="apple-form-select" onchange="onSimCodeChange(this.value)">
+                    <option value="200" selected>200 OK</option>
+                    <option value="401">401 Unauthorized</option>
+                    <option value="403">403 Forbidden</option>
+                    <option value="429">429 Rate Limited</option>
+                    <option value="500">500 Server Error</option>
+                    <option value="504">504 Gateway Timeout</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Human-Friendly Explanation Callout -->
+              <div class="sim-explanation-callout">
+                <div class="sim-explanation-icon" id="simExplanationIcon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+                <div class="sim-explanation-content">
+                  <span class="sim-explanation-label">PLAIN-ENGLISH DIAGNOSIS:</span>
+                  <span class="sim-explanation-text" id="simExplanationText">
+                    Lightning fast! At 80ms, this call is well within the 1000ms SLA target. End-users experience instantaneous, smooth interaction.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         SECTION: How to Demo This Project (Judges & Evaluators Walkthrough)
+         ========================================================================= -->
+    <section class="apple-demo-section" id="howToDemo">
+      <div class="section-container">
+        <div class="section-header-center">
+          <span class="apple-subheading-tag">QUICK-START GUIDE</span>
+          <h2 class="apple-section-title">How to demo this in 3 clicks.</h2>
+          <p class="apple-section-desc">Experience deterministic validation, SLA latency tracking, and zero-debit replay caching in under 60 seconds.</p>
+        </div>
+
+        <div class="demo-steps-container">
+          <!-- Step 1 -->
+          <div class="demo-step-card">
+            <div class="demo-step-num">1</div>
+            <h3>Pick a Tenant Subscription</h3>
+            <p>Select your tier: <strong>Ultra Plan</strong> (100 runs/day cap &bull; ₹2,000/mo), <strong>Enterprise Pro</strong> (10 runs/day &bull; ₹500/mo), or <strong>Developer Basic</strong> (3 runs/day &bull; Free).</p>
+            <div class="demo-step-action">
+              <a href="#subscriptions" class="demo-step-pill-link">
+                <span>View Subscriptions (3 Tiers) ↓</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="demo-step-card">
+            <div class="demo-step-num">2</div>
+            <h3>Choose a Pre-Loaded Scenario</h3>
+            <p>On the Console, pick from 5 test fixtures (<code>2 Valid Snapshot</code>, <code>6 Invalid Rules</code>, or <code>504 Timeout</code>). A fresh Idempotency Key is auto-generated!</p>
+            <div class="demo-step-action">
+              <button type="button" class="demo-step-pill-link" onclick="navigateTo('console')">
+                <span>Open Console Scenarios →</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="demo-step-card">
+            <div class="demo-step-num">3</div>
+            <h3>Run Pipeline &amp; Observe</h3>
+            <p>Click <strong>Run Pipeline</strong> to see the green <code>201 CREATED</code> pill, the SLA latency spectrum chart, the classified table, and replay caching in action.</p>
+            <div class="demo-step-action">
+              <button type="button" class="demo-step-pill-link" onclick="navigateTo('console')">
+                <span>Launch Live Workbench →</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         How It Works Section (Simple, Visual Plain-English Overview)
+         ========================================================================= -->
+    <section class="apple-how-it-works-section" id="howItWorksSection">
+      <div class="section-container">
+        <div class="section-header-center">
+          <span class="apple-subheading-tag">SIMPLE WORKFLOW</span>
+          <h2 class="apple-section-title">How AetherHealth works.</h2>
+          <p class="apple-section-desc">Automated ingestion, strict SLA tracking, and guaranteed tenant protection in 3 steps.</p>
+        </div>
+
+        <div class="steps-grid">
+          <!-- Step 1 -->
+          <div class="step-card">
+            <span class="step-badge">STEP 1 &bull; INGEST &amp; VALIDATE</span>
+            <div class="step-icon-circle blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <h3>1. Check Payload Syntax</h3>
+            <p>Your microservices send connection logs. AetherHealth immediately validates rules R1–R4 (flags duplicate IDs, corrupt HTTP codes, or negative latencies) with line-item precision.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card">
+            <span class="step-badge">STEP 2 &bull; SLA CLASSIFICATION</span>
+            <div class="step-icon-circle amber">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h3>2. Grade Health &amp; Latency</h3>
+            <p>Connections are graded purely in real time: <strong>HEALTHY</strong> (&le;1000ms), <strong>SLOW</strong> (SLA breach &gt;1000ms), <strong>TIMEOUT</strong> (504 gateway dead), or <strong>RATE LIMITED</strong> (429).</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card">
+            <span class="step-badge">STEP 3 &bull; AUDIT &amp; PROTECT</span>
+            <div class="step-icon-circle green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h3>3. Guard Quota &amp; History</h3>
+            <p>Single-statement atomic SQL updates eliminate race conditions. Retrying network requests costs <strong>0 daily quota</strong> via SHA-256 fingerprinting, keeping daily allowances safe.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bento Grid: Core Technical Strengths Explained Simply -->
+    <section class="apple-bento-section">
+      <div class="section-container">
+        <div class="section-header-center">
+          <span class="apple-subheading-tag">WHY IT'S SPECIAL</span>
+          <h2 class="apple-section-title">Built for absolute reliability.</h2>
+          <p class="apple-section-desc">Engineered to eliminate race conditions, duplicate billing, and multi-tenant data leaks.</p>
+        </div>
+
+        <div class="apple-bento-grid">
+          <!-- Card 1: Large Bento -->
+          <div class="bento-card bento-wide">
+            <div class="bento-badge blue">CONCURRENCY CORE</div>
+            <h3>Never Exceed Daily Limits (Race-Condition Free)</h3>
+            <p>Even if 100 microservices hit the API in the exact same millisecond, our atomic single-statement SQL lock guarantees that exactly one request claims the final daily slot. Zero quota leaks.</p>
+            <div class="bento-code-snippet">
+              <code>UPDATE DailyUsage SET count = count + 1 WHERE tenant_id = @t AND usage_date = @d AND count &lt; @limit;</code>
+            </div>
+          </div>
+
+          <!-- Card 2: Cryptographic Idempotency -->
+          <div class="bento-card">
+            <div class="bento-badge purple">REPLAY IMMUNITY</div>
+            <h3>Never Pay Twice for Retried Requests</h3>
+            <p>Network timeouts cause clients to retry. Using SHA-256 cryptographic fingerprints, AetherHealth recognizes identical runs and returns the cached result with <strong>0 quota deducted</strong>.</p>
+          </div>
+
+          <!-- Card 3: Pure Health Classifier -->
+          <div class="bento-card">
+            <div class="bento-badge green">PURE CLASSIFIER</div>
+            <h3>Catch Latency Breaches Before Users Complain</h3>
+            <p>Automatic 1000ms SLA tracking flags slow degradation early. Order-preserving pure function evaluation guarantees that telemetry classification has zero side effects.</p>
+          </div>
+
+          <!-- Card 4: Tenant Isolation -->
+          <div class="bento-card bento-wide">
+            <div class="bento-badge amber">ZERO-TRUST SECURITY</div>
+            <h3>100% Private Multi-Tenant Boundaries</h3>
+            <p>Tenant identity is derived strictly from verified session tokens. Any request attempting to spoof headers (e.g. <code>X-Tenant-Override</code>) is rejected immediately with <code>400 Bad Request</code>, and cross-tenant requests return a strict <code>404 Not Found</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subscriptions Pricing Showcase -->
+    <section class="apple-pricing-section" id="subscriptions">
+      <div class="section-container">
+        <div class="section-header-center">
+          <span class="apple-subheading-tag">SUBSCRIPTION PLANS</span>
+          <h2 class="apple-section-title">Multi-tenant enterprise access.</h2>
+          <p class="apple-section-desc">Dedicated isolation, daily quota allowances, and RBAC authorization profiles.</p>
+        </div>
+
+        <div class="apple-pricing-grid">
+          <!-- Tier 1: Developer Basic -->
+          <div class="pricing-card" onclick="selectSubscriptionAndLaunch('token-tenant-b-operator', event)" title="Click to open Dashboard as Developer Basic">
+            <div class="pricing-badge basic">DEVELOPER BASIC</div>
+            <h3>Developer Basic</h3>
+            <span class="pricing-tenant-id">Free tier for testing &amp; validation</span>
+
+            <!-- Prominent Price Tag -->
+            <div class="pricing-price-header">
+              <div class="pricing-price-main">
+                <span class="pricing-currency">₹</span>
+                <span class="pricing-rate">0</span>
+                <span class="pricing-cadence">/ forever free</span>
+              </div>
+              <div class="pricing-quota-indicator">
+                <span class="pricing-quota-tag">3 Runs / UTC Day</span>
+                <span class="pricing-quota-sub">&bull; 90 runs / mo</span>
+              </div>
+            </div>
+
+            <ul class="pricing-features">
+              <li><span class="check-icon">✓</span> <strong>Snapshot Validation:</strong> Strict R1–R4 rule checks</li>
+              <li><span class="check-icon">✓</span> <strong>Deterministic Errors:</strong> Pinpointed field issues</li>
+              <li><span class="cross-icon">✕</span> <code>process</code> Operation Restricted (Returns 403)</li>
+              <li><span class="check-icon">✓</span> <strong>Audit Vault:</strong> Historical run inspection</li>
+            </ul>
+            <div class="pricing-actions">
+              <button type="button" class="apple-btn-secondary full-width" onclick="loginWithToken('token-tenant-b-operator', true)">
+                Get Started Free →
+              </button>
+              <button type="button" class="apple-btn-ghost full-width" onclick="loginWithToken('token-tenant-b-viewer', true)">
+                View Demo (Auditor) →
+              </button>
+            </div>
+            <div class="card-click-hint">Click card to launch Basic Dashboard</div>
+          </div>
+
+          <!-- Tier 2: Enterprise Pro -->
+          <div class="pricing-card featured" onclick="selectSubscriptionAndLaunch('token-tenant-a-operator', event)" title="Click to open Dashboard as Enterprise Pro">
+            <div class="pricing-badge pro">MOST POPULAR &bull; ENTERPRISE PRO</div>
+            <h3>Enterprise Pro</h3>
+            <span class="pricing-tenant-id">Production telemetry &amp; health classification</span>
+            
+            <!-- Prominent Price Tag -->
+            <div class="pricing-price-header">
+              <div class="pricing-price-main">
+                <span class="pricing-currency">₹</span>
+                <span class="pricing-rate">500</span>
+                <span class="pricing-cadence">/ month</span>
+              </div>
+              <div class="pricing-quota-indicator">
+                <span class="pricing-quota-tag">10 Runs / UTC Day</span>
+                <span class="pricing-quota-sub">&bull; 300 runs / mo</span>
+              </div>
+            </div>
+
+            <ul class="pricing-features">
+              <li><span class="check-icon">✓</span> <strong>Full Engine:</strong> Both <code>validate</code> &amp; <code>process</code> allowed</li>
+              <li><span class="check-icon">✓</span> <strong>Pure Health Classifier:</strong> 5-status deep telemetry</li>
+              <li><span class="check-icon">✓</span> <strong>Latency Waterfall:</strong> SLA breach tracking (1000ms)</li>
+              <li><span class="check-icon">✓</span> <strong>Audit Vault:</strong> JSON &amp; CSV export tools</li>
+            </ul>
+            <div class="pricing-actions">
+              <button type="button" class="apple-btn-primary full-width" onclick="loginWithToken('token-tenant-a-operator', true)">
+                Upgrade to Pro (₹500) →
+              </button>
+              <button type="button" class="apple-btn-secondary full-width" onclick="loginWithToken('token-tenant-a-viewer', true)">
+                Launch as Auditor (Viewer) →
+              </button>
+            </div>
+            <div class="card-click-hint">Click card to launch Pro Dashboard</div>
+          </div>
+
+          <!-- Tier 3: Ultra Plan -->
+          <div class="pricing-card ultra-featured" onclick="selectSubscriptionAndLaunch('token-tenant-ultra-operator', event)" title="Click to open Dashboard as Ultra Plan">
+            <div class="pricing-badge ultra">ULTRA SCALE &bull; NO LIMITS</div>
+            <h3>Ultra Plan</h3>
+            <span class="pricing-tenant-id">High-frequency throughput &amp; priority SLA</span>
+            
+            <!-- Prominent Price Tag -->
+            <div class="pricing-price-header">
+              <div class="pricing-price-main">
+                <span class="pricing-currency">₹</span>
+                <span class="pricing-rate">2,000</span>
+                <span class="pricing-cadence">/ month</span>
+              </div>
+              <div class="pricing-quota-indicator">
+                <span class="pricing-quota-tag">100 Runs / UTC Day</span>
+                <span class="pricing-quota-sub">&bull; 3,000 runs / mo</span>
+              </div>
+            </div>
+
+            <ul class="pricing-features">
+              <li><span class="check-icon">✓</span> <strong>Unrestricted Engine:</strong> Full <code>validate</code> &amp; <code>process</code> pipeline</li>
+              <li><span class="check-icon">✓</span> <strong>Generous Cap:</strong> 100 runs/day (10x Pro capacity)</li>
+              <li><span class="check-icon">✓</span> <strong>High Concurrency:</strong> Zero lock waits under peak traffic</li>
+              <li><span class="check-icon">✓</span> <strong>Enterprise Audit:</strong> Real-time replay &amp; CSV vault</li>
+            </ul>
+            <div class="pricing-actions">
+              <button type="button" class="apple-btn-ultra full-width" onclick="loginWithToken('token-tenant-ultra-operator', true)">
+                Launch Ultra Plan (₹2000) →
+              </button>
+              <button type="button" class="apple-btn-ghost full-width" onclick="openAuthModal('register')">
+                Register Custom Organization →
+              </button>
+            </div>
+            <div class="card-click-hint">Click card to launch Ultra Dashboard</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 2: Run Console (Light Mode Developer Workbench)
+       ========================================================================= -->
+  <main id="sectionConsole" class="view-section">
+    <div class="workbench-container">
+      <!-- Workbench Header -->
+      <div class="workbench-header-row">
+        <div>
+          <h2 class="workbench-title">Connection Health Console</h2>
+          <p class="workbench-sub">Deterministic snapshot validation, SLA tracking &amp; pure health classification</p>
+        </div>
+        <div class="workbench-meta">
+          <span class="apple-role-chip" id="roleIndicator">OPERATOR ACCESS</span>
+        </div>
+      </div>
+
+      <!-- 2-Column Clean Workbench -->
+      <div class="workbench-two-col">
+        <!-- LEFT: Request Composer -->
+        <div class="apple-card composer-card">
+          <!-- Top Bar: Process vs Validate -->
+          <div class="composer-toolbar">
+            <div class="segmented-control">
+              <button type="button" class="segment-btn active" id="btnOpProcess" onclick="setOperation('process')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Process (Full Engine)</span>
+              </button>
+              <button type="button" class="segment-btn" id="btnOpValidate" onclick="setOperation('validate')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Validate Only</span>
+              </button>
+            </div>
+
+            <div class="segmented-control mini">
+              <button type="button" class="segment-btn active" id="btnModeJson" onclick="switchEditorMode('json')">JSON</button>
+              <button type="button" class="segment-btn" id="btnModeCsv" onclick="switchEditorMode('csv')">CSV Import</button>
+            </div>
+          </div>
+
+          <!-- Quick Test Scenarios Selection Grid -->
+          <div class="scenarios-control-box">
+            <div class="scenarios-header">
+              <span class="scenarios-title">TEST SCENARIOS (ACCEPTANCE FIXTURES)</span>
+              <span class="scenarios-subtitle">Select to load payload &bull; Auto-generates fresh Idempotency Key</span>
+            </div>
+            <div class="scenarios-grid">
+              <button type="button" class="scenario-btn active" id="chip-valid" onclick="loadFixture('valid', this)">
+                <span class="apple-dot green"></span>
+                <div class="scenario-text">
+                  <strong>2 Valid Snapshot (A02)</strong>
+                  <small>Clean baseline &bull; 0 errors</small>
+                </div>
+              </button>
+              <button type="button" class="scenario-btn" id="chip-invalid" onclick="loadFixture('invalid', this)">
+                <span class="apple-dot amber"></span>
+                <div class="scenario-text">
+                  <strong>6 Invalid Rules (A03)</strong>
+                  <small>Catches R1–R4 rule errors</small>
+                </div>
+              </button>
+              <button type="button" class="scenario-btn" id="chip-process_sample" onclick="loadFixture('process_sample', this)">
+                <span class="apple-dot blue"></span>
+                <div class="scenario-text">
+                  <strong>Pro Batch (A04)</strong>
+                  <small>SLA &amp; pure health classification</small>
+                </div>
+              </button>
+              <button type="button" class="scenario-btn" id="chip-timeout" onclick="loadFixture('timeout', this)">
+                <span class="apple-dot red"></span>
+                <div class="scenario-text">
+                  <strong>504 Gateway Timeout</strong>
+                  <small>3000ms latency breach</small>
+                </div>
+              </button>
+              <button type="button" class="scenario-btn" id="chip-overflow" onclick="loadFixture('overflow', this)">
+                <span class="apple-dot purple"></span>
+                <div class="scenario-text">
+                  <strong>11-Row Overflow (A05)</strong>
+                  <small>Rejection (&gt;10 records)</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Form -->
+          <form id="consoleRunForm" onsubmit="handleConsoleSubmit(event)">
+            <!-- Meta Inputs -->
+            <div class="meta-row">
+              <div class="meta-input-group">
+                <div class="label-row">
+                  <label for="idempotencyKey">IDEMPOTENCY KEY</label>
+                  <button type="button" class="btn-text-action" onclick="generateNewKey()">Auto-Gen</button>
+                </div>
+                <div class="input-with-icon">
+                  <input type="text" id="idempotencyKey" class="apple-input mono" required placeholder="run-uuid-001">
+                  <button type="button" class="btn-copy-icon" onclick="copyIdempotencyKey()" title="Copy Key">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="meta-input-group">
+                <div class="label-row">
+                  <label>FAULT INJECTION (TEST HARNESS)</label>
+                </div>
+                <label class="apple-toggle-switch">
+                  <input type="checkbox" id="checkForceFailure">
+                  <span class="toggle-track"></span>
+                  <span class="toggle-text">Simulate Post-Acceptance Failure (A11)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Code Editor Box -->
+            <div class="apple-editor-card" id="appleEditorCard">
+              <div class="editor-header-bar">
+                <div class="editor-tab">
+                  <span class="tab-icon">{ }</span>
+                  <span class="tab-title" id="editorFilename">records.json</span>
+                </div>
+                <div class="editor-tools">
+                  <span class="stat-pill" id="recordByteStat">215 B / 64 KiB</span>
+                  <span class="stat-pill" id="recordCountStat">2 rows</span>
+                  <button type="button" class="btn-editor-tool upload-btn" onclick="triggerFileInput()" title="Drag & drop or upload .json or .csv log file">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>Upload File</span>
+                  </button>
+                  <input type="file" id="fileUploadInput" accept=".json,.csv,.txt" onchange="handleFileUpload(event)" style="display: none;">
+                  <button type="button" class="btn-editor-tool" onclick="prettifyJsonInput()">Format JSON</button>
+                </div>
+              </div>
+              <textarea id="recordsInput" class="apple-textarea" rows="13" spellcheck="false" required></textarea>
+              <div class="drag-overlay-cue">
+                <div class="drag-cue-pill">Drop .json or .csv log file to import</div>
+              </div>
+            </div>
+
+            <!-- Stepper -->
+            <div class="stepper-bar" id="pipelineStepper" style="display: none;">
+              <div class="step-node" id="step1"><span class="step-num">1</span> Auth</div>
+              <div class="step-bar"></div>
+              <div class="step-node" id="step2"><span class="step-num">2</span> SHA-256</div>
+              <div class="step-bar"></div>
+              <div class="step-node" id="step3"><span class="step-num">3</span> Idempotency</div>
+              <div class="step-bar"></div>
+              <div class="step-node" id="step4"><span class="step-num">4</span> Quota</div>
+              <div class="step-bar"></div>
+              <div class="step-node" id="step5"><span class="step-num">5</span> Classifier</div>
+            </div>
+
+            <!-- Submit Bar -->
+            <div class="submit-action-bar">
+              <span class="shortcut-tip">Press <kbd>⌘ + Enter</kbd> to execute</span>
+              <button type="submit" id="btnExecuteRun" class="apple-btn-execute">
+                <span id="btnExecuteText">Execute Pipeline Run</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- RIGHT: Live Telemetry & Output Inspector -->
+        <div class="apple-card inspector-card">
+          <div class="inspector-header-bar">
+            <div>
+              <h3>Real-Time Telemetry &amp; Inspector</h3>
+              <span class="run-id-text">Run ID: <code id="metaRunId">—</code></span>
+            </div>
+            <div class="inspector-status-actions">
+              <span id="runStatusBadge" class="apple-status-tag idle">STANDBY</span>
+              <div class="export-btns" id="exportBtnGroup" style="display: none;">
+                <button type="button" class="btn-export-pill" onclick="exportCurrentReport('csv')">CSV</button>
+                <button type="button" class="btn-export-pill" onclick="exportCurrentReport('json')">JSON</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inspector Body -->
+          <div id="inspectorBody" class="inspector-scroll-area">
+            <!-- Standby Guide (No More Empty Void!) -->
+            <div class="standby-guide">
+              <div class="standby-banner">
+                <div class="banner-icon-badge">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <div>
+                  <h4>Ready for Snapshot Execution</h4>
+                  <p>Execute an operation from the composer or trigger a one-click benchmark below to preview classification telemetry.</p>
+                </div>
+              </div>
+
+              <!-- Quick Benchmarks Grid -->
+              <h5 class="guide-title">One-Click Benchmarks:</h5>
+              <div class="benchmarks-grid">
+                <div class="benchmark-box bm-healthy" onclick="loadFixture('valid'); runSimTest(200, 80, 'TEST');">
+                  <div class="bm-top">
+                    <span class="apple-status-tag healthy">HEALTHY</span>
+                    <span class="bm-ms">80 ms</span>
+                  </div>
+                  <strong>Standard 200 OK</strong>
+                  <p>Latency &le; 1000ms SLA threshold. Passes all R1–R4 rules.</p>
+                  <span class="bm-link">Load &amp; Preview →</span>
+                </div>
+
+                <div class="benchmark-box bm-slow" onclick="runSimTest(200, 1420, 'STAGE')">
+                  <div class="bm-top">
+                    <span class="apple-status-tag slow">SLOW</span>
+                    <span class="bm-ms">1420 ms</span>
+                  </div>
+                  <strong>SLA Latency Breach</strong>
+                  <p>Status 200 OK but latency exceeds 1000ms SLA boundary.</p>
+                  <span class="bm-link">Simulate SLA Breach →</span>
+                </div>
+
+                <div class="benchmark-box bm-timeout" onclick="loadFixture('timeout'); runSimTest(504, 3000, 'STAGE');">
+                  <div class="bm-top">
+                    <span class="apple-status-tag timeout">TIMEOUT</span>
+                    <span class="bm-ms">3000 ms</span>
+                  </div>
+                  <strong>504 Gateway Timeout</strong>
+                  <p>Upstream failure snapshot classified as TIMEOUT status.</p>
+                  <span class="bm-link">Load &amp; Preview →</span>
+                </div>
+
+                <div class="benchmark-box bm-ratelimit" onclick="runSimTest(429, 210, 'TEST')">
+                  <div class="bm-top">
+                    <span class="apple-status-tag ratelimit">RATE_LIMITED</span>
+                    <span class="bm-ms">210 ms</span>
+                  </div>
+                  <strong>429 Rate Limited</strong>
+                  <p>Classified as RATE_LIMITED with zero downstream degradation.</p>
+                  <span class="bm-link">Simulate Rate Limit →</span>
+                </div>
+              </div>
+
+              <!-- Rules Cheat Sheet -->
+              <h5 class="guide-title" style="margin-top: 20px;">Contract Rules Reference:</h5>
+              <div class="rules-grid">
+                <div class="rule-card">
+                  <span class="rule-code r1">R1</span>
+                  <span><strong>record_id:</strong> Nonempty string, &le; 20 chars, batch unique. Subsequent duplicates flagged.</span>
+                </div>
+                <div class="rule-card">
+                  <span class="rule-code r2">R2</span>
+                  <span><strong>status_code:</strong> Integer in {200, 401, 429, 504}. Booleans and strings rejected.</span>
+                </div>
+                <div class="rule-card">
+                  <span class="rule-code r3">R3</span>
+                  <span><strong>latency_ms:</strong> Integer in 0..60000 ms. 200 OK &le; 1000ms evaluates to HEALTHY.</span>
+                </div>
+                <div class="rule-card">
+                  <span class="rule-code r4">R4</span>
+                  <span><strong>environment:</strong> Strict enum in {TEST, STAGE}.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 3: Tenant Audit Vault (History Screen)
+       ========================================================================= -->
+  <main id="sectionHistory" class="view-section">
+    <div class="workbench-container">
+      <div class="workbench-header-row">
+        <div>
+          <h2 class="workbench-title">Tenant Audit Vault</h2>
+          <p class="workbench-sub">Persisted run records strictly scoped to verified tenant session context.</p>
+        </div>
+        <div class="workbench-meta">
+          <button type="button" class="apple-btn-secondary" onclick="exportFullVault('csv')">Export CSV</button>
+          <button type="button" class="apple-btn-secondary" onclick="exportFullVault('json')">Export JSON</button>
+          <button type="button" class="apple-btn-primary" onclick="loadHistory()">Sync Vault</button>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="vault-toolbar">
+        <div class="search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="historySearchInput" placeholder="Filter by Run ID or Idempotency Key..." oninput="filterHistoryTable()">
+        </div>
+        <div class="filter-pills">
+          <button type="button" class="filter-chip active" id="filterStatusAll" onclick="setHistoryFilter('status', 'all')">All Runs</button>
+          <button type="button" class="filter-chip" id="filterStatusCompleted" onclick="setHistoryFilter('status', 'Completed')">Completed</button>
+          <button type="button" class="filter-chip" id="filterStatusFailed" onclick="setHistoryFilter('status', 'Failed')">Failed</button>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="apple-card table-wrapper">
+        <table class="apple-table">
+          <thead>
+            <tr>
+              <th>RUN IDENTIFIER</th>
+              <th>OPERATION</th>
+              <th>LIFECYCLE STATUS</th>
+              <th>IDEMPOTENCY KEY</th>
+              <th>TIMESTAMP (UTC)</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="6" class="empty-table-cell">Querying tenant audit vault...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       PAGE 4: Subscriptions & Logins Hub
+       ========================================================================= -->
+  <!-- =========================================================================
+       PAGE 4: Enterprise Profile & Subscriptions Hub
+       ========================================================================= -->
+  <main id="sectionProfile" class="view-section">
+    <div class="workbench-container">
+      <div class="workbench-header-row">
+        <div>
+          <span class="apple-subheading-tag">TENANT IDENTITY</span>
+          <h2 class="workbench-title">Profile &amp; Subscription Command</h2>
+          <p class="workbench-sub">Manage authenticated tenant context, cryptographic session credentials, daily quota limits, and RBAC policies.</p>
+        </div>
+        <div class="workbench-meta">
+          <button type="button" class="apple-btn-secondary" onclick="navigateTo('console')">Return to Run Console →</button>
+        </div>
+      </div>
+
+      <!-- Active Profile Hero Bento -->
+      <div class="apple-card active-session-banner">
+        <div class="session-left">
+          <div class="session-avatar-large" id="sessionLargeAvatar">OP</div>
+          <div class="session-info-col">
+            <div class="session-name-row">
+              <h3 id="sessionCompanyName">Acme Cloud Dynamics</h3>
+              <span class="apple-role-chip pro" id="sessionPlanRoleBadge">Pro • Operator</span>
+              <span class="verified-pill">✓ Verified Cloud Tenant</span>
+            </div>
+            <p class="session-meta">
+              Tenant ID: <code id="sessionTenantId">tenant-a</code> &bull; Email: <span id="sessionEmail">operator@tenanta.com</span> &bull; Status: <span class="apple-dot green"></span> <span id="sessionStatus">active</span>
+            </p>
+            <div class="session-token-bar">
+              <span class="token-label">Active Bearer Token:</span>
+              <code class="token-code-snippet" id="sessionTokenVal">token-tenant-a-operator</code>
+              <button type="button" class="btn-copy-mini" onclick="copyCurrentToken()" title="Copy Bearer Token">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 3px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="session-right">
+          <span class="quota-label">DAILY RUN ALLOWANCE</span>
+          <span class="quota-val" id="sessionRemainingQuota">10 / 10 Runs</span>
+          <span class="quota-subtext" id="sessionQuotaBadge">Pro Tier Allowance &bull; Resets 00:00 UTC</span>
+        </div>
+      </div>
+
+      <!-- RBAC Privileges & Specification Enforcement Matrix -->
+      <div class="apple-card rbac-matrix-card">
+        <h4 class="card-inner-title">RBAC Privileges &amp; Specification Policies</h4>
+        <div class="rbac-grid">
+          <div class="rbac-item">
+            <span class="rbac-item-label">Full Execution (/v1/runs:process)</span>
+            <span class="rbac-item-status allowed" id="sessionPermProcess">Allowed (Full Engine)</span>
+            <span class="rbac-item-desc">Executes pure health classifier, debits daily quota, records to audit vault.</span>
+          </div>
+          <div class="rbac-item">
+            <span class="rbac-item-label">Snapshot Validation (/v1/runs:validate)</span>
+            <span class="rbac-item-status allowed" id="sessionPermValidate">Allowed (R1–R4 Rules)</span>
+            <span class="rbac-item-desc">Evaluates byte-boundary syntax with zero quota deduction.</span>
+          </div>
+          <div class="rbac-item">
+            <span class="rbac-item-label">Audit Vault Inspection (/v1/runs)</span>
+            <span class="rbac-item-status allowed">Allowed (Strict Tenant Isolation)</span>
+            <span class="rbac-item-desc">Strict 404 boundary if accessing another tenant's records.</span>
+          </div>
+          <div class="rbac-item">
+            <span class="rbac-item-label">Concurrency Immunity</span>
+            <span class="rbac-item-status allowed">Single-SQL Atomic Lock</span>
+            <span class="rbac-item-desc">Guaranteed race immunity: <code>UPDATE DailyUsage ... count &lt; @limit</code></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tiers Quick Switcher Grid -->
+      <div class="section-sub-header">
+        <h3>Switch Tenant Subscription Context</h3>
+        <p>Switch between provisioned test tenants to verify RBAC policies, quota exhaustion, and delinquent states.</p>
+      </div>
+
+      <div class="apple-tiers-grid">
+        <!-- Ultra Tier -->
+        <div class="apple-tier-box pro" onclick="loginWithToken('token-tenant-ultra-operator', true)">
+          <div class="tier-top">
+            <span class="tier-badge pro">ULTRA PLAN &bull; 100 RUNS/DAY &bull; ₹2,000/mo</span>
+            <h4>Ultra Scale Labs</h4>
+            <span class="tenant-code">tenant-ultra</span>
+          </div>
+          <p>Unrestricted execution pipeline: snapshot validation, pure health classification, high-throughput 100 runs/day allowance.</p>
+          <div class="tier-btns">
+            <button type="button" class="tier-btn primary" onclick="loginWithToken('token-tenant-ultra-operator', true)">
+              <strong>Launch as Ultra Operator</strong>
+              <small>operator@ultra.com</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pro Tier -->
+        <div class="apple-tier-box pro" onclick="loginWithToken('token-tenant-a-operator', true)">
+          <div class="tier-top">
+            <span class="tier-badge pro">PRO PLAN &bull; 10 RUNS/DAY &bull; ₹500/mo</span>
+            <h4>Enterprise Pro</h4>
+            <span class="tenant-code">tenant-a</span>
+          </div>
+          <p>Full pipeline permissions: snapshot validation (R1–R4), pure health classification, latency SLA tracking, and audit exports.</p>
+          <div class="tier-btns">
+            <button type="button" class="tier-btn primary" onclick="loginWithToken('token-tenant-a-operator', true)">
+              <strong>Launch as Operator</strong>
+              <small>operator@tenanta.com</small>
+            </button>
+            <button type="button" class="tier-btn secondary" onclick="loginWithToken('token-tenant-a-viewer', true)">
+              <strong>Launch as Viewer (Auditor)</strong>
+              <small>viewer@tenanta.com</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Basic Tier -->
+        <div class="apple-tier-box basic" onclick="loginWithToken('token-tenant-b-operator', true)">
+          <div class="tier-top">
+            <span class="tier-badge basic">BASIC PLAN &bull; 3 RUNS/DAY &bull; FREE</span>
+            <h4>Developer Basic</h4>
+            <span class="tenant-code">tenant-b</span>
+          </div>
+          <p>Snapshot validation only. Calling <code>process</code> returns <code>403 Forbidden</code> per specification contract. Daily limit 3 runs.</p>
+          <div class="tier-btns">
+            <button type="button" class="tier-btn secondary" onclick="loginWithToken('token-tenant-b-operator', true)">
+              <strong>Launch as Basic Operator</strong>
+              <small>operator@tenantb.com</small>
+            </button>
+            <button type="button" class="tier-btn ghost" onclick="loginWithToken('token-tenant-b-viewer', true)">
+              <strong>Launch as Basic Viewer</strong>
+              <small>viewer@tenantb.com</small>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Credential Form Card -->
+      <div class="apple-card credentials-card">
+        <div class="credentials-cols">
+          <form id="pageCredentialForm" onsubmit="handleCredentialLogin(event, 'page')" class="cred-col">
+            <h4>Password Credentials</h4>
+            <div class="form-field">
+              <label for="pageLoginEmail">Enterprise Email</label>
+              <input type="email" id="pageLoginEmail" class="apple-form-input" required value="operator@tenanta.com">
+            </div>
+            <div class="form-field">
+              <label for="pageLoginPassword">Password</label>
+              <input type="password" id="pageLoginPassword" class="apple-form-input" required value="Password123!">
+            </div>
+            <button type="submit" class="apple-btn-primary full-width" style="margin-top: 14px;">
+              Authenticate Password Session
+            </button>
+          </form>
+
+          <div class="cred-divider"></div>
+
+          <form id="tokenAuthForm" onsubmit="handleTokenDirectLogin(event)" class="cred-col">
+            <h4>Direct Session Token</h4>
+            <div class="form-field">
+              <label for="customTokenInput">Bearer Session Token</label>
+              <input type="text" id="customTokenInput" class="apple-form-input mono" required placeholder="token-tenant-a-operator">
+            </div>
+            <p class="field-hint">Enables testing raw session tokens, custom JWTs, or simulated headers.</p>
+            <button type="submit" class="apple-btn-secondary full-width" style="margin-top: 14px;">
+              Set Session Context
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       PAGE: Live Telemetry Analytics & SLA Dashboard
+       ========================================================================= -->
+  <main id="sectionAnalytics" class="view-section">
+    <div class="workbench-container">
+      <div class="workbench-header-row">
+        <div>
+          <h2 class="workbench-title">Live Telemetry &amp; SLA Analytics</h2>
+          <p class="workbench-sub">Continuous 1000ms SLA tracking, latency spectrums, and tenant quota velocity</p>
+        </div>
+        <div class="workbench-meta">
+          <button type="button" class="apple-btn-primary" onclick="openTrafficSimulatorModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Simulate Live Traffic</span>
+          </button>
+          <button type="button" class="apple-btn-secondary" onclick="openExecutiveReportModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>Generate Executive Report</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Top KPI Metric Cards -->
+      <div class="analytics-kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">SLA COMPLIANCE RATE (&le;1000ms)</div>
+          <div class="kpi-value-row">
+            <span class="kpi-val" id="kpiSlaRate">98.4%</span>
+            <span class="kpi-badge pass">✓ IN SLA</span>
+          </div>
+          <span class="kpi-hint">Target: &ge; 95.0% adherence</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">MEDIAN LATENCY (P50)</div>
+          <div class="kpi-value-row">
+            <span class="kpi-val" id="kpiMedianLatency">80 ms</span>
+            <span class="kpi-badge fast">LIGHTNING</span>
+          </div>
+          <span class="kpi-hint">P99 Latency: <span id="kpiP99Latency">1,420 ms</span></span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">TOTAL EVALUATED CONNECTIONS</div>
+          <div class="kpi-value-row">
+            <span class="kpi-val" id="kpiTotalConnections">0</span>
+            <span class="kpi-badge blue">ALL LOGS</span>
+          </div>
+          <span class="kpi-hint">Across <span id="kpiTotalRuns">0</span> executed runs</span>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">IDEMPOTENCY SAVINGS (REPLAYS)</div>
+          <div class="kpi-value-row">
+            <span class="kpi-val" id="kpiReplaysSaved">0</span>
+            <span class="kpi-badge green">$0 EXTRA COST</span>
+          </div>
+          <span class="kpi-hint">Zero quota debited via SHA-256</span>
+        </div>
+      </div>
+
+      <!-- Interactive SVG Latency Timeline Chart -->
+      <div class="apple-card analytics-chart-card">
+        <div class="chart-card-header">
+          <div>
+            <h3>Latency Trend &amp; SLA Breach Timeline</h3>
+            <p>Chronological connection latency distribution across consecutive evaluated batches</p>
+          </div>
+          <div class="chart-legend-row">
+            <span class="chart-legend-item">
+              <span class="chart-legend-line normal"></span>
+              <span>Observed Latency (ms)</span>
+            </span>
+            <span class="chart-legend-item">
+              <span class="chart-legend-line breach"></span>
+              <span>1000ms SLA Threshold</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="timeline-chart-wrap" id="timelineChartWrap">
+          <svg class="latency-svg-chart" id="latencySvgChart" viewBox="0 0 1000 240" preserveAspectRatio="none">
+            <!-- Rendered dynamically via renderLatencyTimelineChart() -->
+          </svg>
+          <div class="chart-tooltip" id="chartTooltip" style="display: none;"></div>
+        </div>
+
+        <div class="chart-card-footer">
+          <span id="chartTotalPoints">Tracking 0 data points</span>
+          <span class="chart-guide-badge">Hover nodes for run metadata &bull; Dynamic Auto-scaled 0–2000ms</span>
+        </div>
+      </div>
+
+      <!-- Main Analytics Two-Column Visual Grids -->
+      <div class="analytics-panels-grid">
+        <!-- Panel 1: SLA Latency Spectrum Breakdown -->
+        <div class="apple-card analytics-panel">
+          <div class="panel-head">
+            <div>
+              <h3>1000ms SLA Latency Spectrum</h3>
+              <p>Distribution of inspected connections across latency intervals</p>
+            </div>
+          </div>
+          <div class="spectrum-bars-list" id="spectrumBarsList">
+            <div class="spectrum-row">
+              <div class="sr-label">
+                <span class="apple-dot green"></span>
+                <span>Fast (&le;100 ms)</span>
+              </div>
+              <div class="sr-bar-track">
+                <div class="sr-bar-fill green" id="barFast" style="width: 75%;"></div>
+              </div>
+              <span class="sr-val" id="valFast">75%</span>
+            </div>
+            <div class="spectrum-row">
+              <div class="sr-label">
+                <span class="apple-dot blue"></span>
+                <span>Nominal (100–500 ms)</span>
+              </div>
+              <div class="sr-bar-track">
+                <div class="sr-bar-fill blue" id="barNominal" style="width: 15%;"></div>
+              </div>
+              <span class="sr-val" id="valNominal">15%</span>
+            </div>
+            <div class="spectrum-row">
+              <div class="sr-label">
+                <span class="apple-dot amber"></span>
+                <span>Borderline (500–1000 ms)</span>
+              </div>
+              <div class="sr-bar-track">
+                <div class="sr-bar-fill amber" id="barBorderline" style="width: 6%;"></div>
+              </div>
+              <span class="sr-val" id="valBorderline">6%</span>
+            </div>
+            <div class="spectrum-row">
+              <div class="sr-label">
+                <span class="apple-dot red"></span>
+                <span>SLA Breach (&gt;1000 ms)</span>
+              </div>
+              <div class="sr-bar-track">
+                <div class="sr-bar-fill red" id="barBreach" style="width: 4%;"></div>
+              </div>
+              <span class="sr-val" id="valBreach">4%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 2: 5-State Telemetry Classification Proportions -->
+        <div class="apple-card analytics-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Pure Telemetry Classifications</h3>
+              <p>Breakdown across pure 5-status evaluation rules</p>
+            </div>
+          </div>
+          <div class="health-breakdown-list" id="healthBreakdownList">
+            <div class="health-stat-row">
+              <span class="apple-status-tag healthy">HEALTHY</span>
+              <span class="hs-desc">Status 200 OK with Latency &le; 1000ms</span>
+              <strong class="hs-count" id="countHealthy">0</strong>
+            </div>
+            <div class="health-stat-row">
+              <span class="apple-status-tag slow">SLOW</span>
+              <span class="hs-desc">Status 200 OK with Latency &gt; 1000ms SLA Breach</span>
+              <strong class="hs-count" id="countSlow">0</strong>
+            </div>
+            <div class="health-stat-row">
+              <span class="apple-status-tag timeout">TIMEOUT</span>
+              <span class="hs-desc">Status 504 Gateway Timeout</span>
+              <strong class="hs-count" id="countTimeout">0</strong>
+            </div>
+            <div class="health-stat-row">
+              <span class="apple-status-tag ratelimit">RATE_LIMITED</span>
+              <span class="hs-desc">Status 429 Rate Limit Throttled</span>
+              <strong class="hs-count" id="countRateLimit">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Active Tenant Daily Quota Velocity -->
+        <div class="apple-card analytics-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Daily Quota Velocity</h3>
+              <p>Atomic single-statement reservation tracking for current session</p>
+            </div>
+            <span class="tenant-role-tag pro" id="analyticsPlanTag">Pro Tier</span>
+          </div>
+          <div class="quota-velocity-content">
+            <div class="qv-metric-header">
+              <span class="qv-large" id="analyticsQuotaConsumed">0</span>
+              <span class="qv-total" id="analyticsQuotaLimit">/ 10 Runs Today</span>
+            </div>
+            <div class="qv-bar-track">
+              <div class="qv-bar-fill" id="analyticsQuotaFill" style="width: 0%;"></div>
+            </div>
+            <div class="qv-footer-meta">
+              <span>Resets automatically at 00:00 UTC</span>
+              <span class="qv-wal-badge">SQLite WAL Atomic Lock</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 4: Environment Health Comparison -->
+        <div class="apple-card analytics-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Environment Comparison (TEST vs STAGE)</h3>
+              <p>Comparative telemetry and latency stability</p>
+            </div>
+          </div>
+          <div class="env-compare-grid">
+            <div class="env-compare-card">
+              <div class="ecc-header">
+                <strong>TEST ENVIRONMENT</strong>
+                <span class="apple-dot green"></span>
+              </div>
+              <div class="ecc-stat">
+                <span class="ecc-label">Avg Response:</span>
+                <strong id="envTestLatency">82 ms</strong>
+              </div>
+              <div class="ecc-stat">
+                <span class="ecc-label">SLA Breaches:</span>
+                <strong id="envTestBreaches">0</strong>
+              </div>
+            </div>
+            <div class="env-compare-card">
+              <div class="ecc-header">
+                <strong>STAGE ENVIRONMENT</strong>
+                <span class="apple-dot amber"></span>
+              </div>
+              <div class="ecc-stat">
+                <span class="ecc-label">Avg Response:</span>
+                <strong id="envStageLatency">1,450 ms</strong>
+              </div>
+              <div class="ecc-stat">
+                <span class="ecc-label">SLA Breaches:</span>
+                <strong id="envStageBreaches">1</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Clean Apple Footer -->
+  <footer class="apple-footer">
+    <div class="footer-container">
+      <span>AetherHealth SaaS &bull; Advantix Cloud &amp; Engineering Challenge (UC-03)</span>
+      <div class="footer-meta">
+        <span class="apple-dot green"></span>
+        <span id="footerDbStatus">Database: Connected (0.03ms)</span>
+        <span class="sep">&bull;</span>
+        <span>Telemetry: Operational</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       MODALS: Database Diagnostics
+       ========================================================================= -->
+  <div class="apple-modal-backdrop" id="dbModal" onclick="closeDbModalOnBackdrop(event)">
+    <div class="apple-modal-box">
+      <div class="modal-top">
+        <div>
+          <h3>Database Telemetry &amp; Diagnostics</h3>
+          <p>Real-time connection metrics, storage footprint &amp; concurrency diagnostics</p>
+        </div>
+        <button type="button" class="btn-modal-close" onclick="closeDbModal()">&times;</button>
+      </div>
+
+      <div class="modal-stats-grid">
+        <div class="stat-cell">
+          <span class="sc-label">STATUS</span>
+          <span class="sc-val green" id="modalDbStatus">Connected</span>
+        </div>
+        <div class="stat-cell">
+          <span class="sc-label">ENGINE TYPE</span>
+          <span class="sc-val" id="modalDbEngine">SQLite 3 (WAL)</span>
+        </div>
+        <div class="stat-cell">
+          <span class="sc-label">QUERY LATENCY</span>
+          <span class="sc-val" id="modalDbPing">0.03 ms</span>
+        </div>
+        <div class="stat-cell">
+          <span class="sc-label">JOURNAL MODE</span>
+          <span class="sc-val" id="modalDbJournal">WAL</span>
+        </div>
+        <div class="stat-cell">
+          <span class="sc-label">INDEXED RUNS</span>
+          <span class="sc-val" id="modalDbRuns">0 Records</span>
+        </div>
+        <div class="stat-cell">
+          <span class="sc-label">DAILY USAGE ROWS</span>
+          <span class="sc-val" id="modalDbUsage">0 Tenants</span>
+        </div>
+      </div>
+
+      <div class="modal-sql-box">
+        <span class="sql-title">SINGLE-STATEMENT ATOMIC QUOTA STATEMENT:</span>
+        <pre><code>UPDATE DailyUsage 
+SET count = count + 1 
+WHERE tenant_id = @tenant_id 
+  AND usage_date = @today 
+  AND count &lt; @limit;</code></pre>
+      </div>
+
+      <div class="modal-benchmark-area">
+        <div class="bm-head">
+          <h4>Performance Benchmark</h4>
+          <button type="button" class="apple-btn-secondary" id="btnRunBenchmark" onclick="runDbBenchmark()">Run 50-Query Benchmark</button>
+        </div>
+        <div id="benchmarkResults" class="bm-result-text">
+          Click "Run 50-Query Benchmark" to measure roundtrip query latency.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enterprise Authentication & Registration Modal -->
+  <div class="apple-modal-backdrop" id="authModal" onclick="closeAuthModalOnBackdrop(event)">
+    <div class="apple-modal-box">
+      <div class="modal-top">
+        <div>
+          <h3 id="authModalHeading">Sign in to AetherHealth</h3>
+          <p id="authModalSubhead">Select a demo tenant identity or create a new organization account</p>
+        </div>
+        <button type="button" class="btn-modal-close" onclick="closeAuthModal()">&times;</button>
+      </div>
+
+      <!-- Segmented Control: Sign In vs Register -->
+      <div class="auth-segmented-tabs">
+        <button type="button" class="auth-segment-tab active" id="tabAuthSignIn" onclick="switchAuthMode('signin')">
+          Sign In
+        </button>
+        <button type="button" class="auth-segment-tab" id="tabAuthRegister" onclick="switchAuthMode('register')">
+          Register Organization
+        </button>
+      </div>
+
+      <!-- VIEW 1: SIGN IN -->
+      <div id="authViewSignIn">
+        <div class="auth-section-label">SELECT VERIFIED DEMO IDENTITY (1-CLICK)</div>
+        <div class="auth-profiles-grid">
+          <div class="auth-profile-card" onclick="loginWithToken('token-tenant-ultra-operator')">
+            <div class="ap-top">
+              <span class="tier-badge pro">ULTRA PLAN &bull; ₹2,000/mo</span>
+              <span class="ap-role">OPERATOR</span>
+            </div>
+            <h4>Ultra Scale Labs</h4>
+            <span class="ap-email">operator@ultra.com</span>
+            <p>Unrestricted engine access with 100 runs/day daily cap (priority SLA).</p>
+          </div>
+
+          <div class="auth-profile-card" onclick="loginWithToken('token-tenant-a-operator')">
+            <div class="ap-top">
+              <span class="tier-badge pro">PRO PLAN &bull; ₹500/mo</span>
+              <span class="ap-role">OPERATOR</span>
+            </div>
+            <h4>Enterprise Pro (Operator)</h4>
+            <span class="ap-email">operator@tenanta.com</span>
+            <p>Full validation and classification pipeline permissions (10 runs/day).</p>
+          </div>
+
+          <div class="auth-profile-card" onclick="loginWithToken('token-tenant-a-viewer')">
+            <div class="ap-top">
+              <span class="tier-badge pro">PRO PLAN &bull; ₹500/mo</span>
+              <span class="ap-role">VIEWER</span>
+            </div>
+            <h4>Enterprise Pro (Auditor)</h4>
+            <span class="ap-email">viewer@tenanta.com</span>
+            <p>Auditor view: inspect historical reports and classification telemetry.</p>
+          </div>
+
+          <div class="auth-profile-card" onclick="loginWithToken('token-tenant-b-operator')">
+            <div class="ap-top">
+              <span class="tier-badge basic">BASIC PLAN &bull; FREE</span>
+              <span class="ap-role">OPERATOR</span>
+            </div>
+            <h4>Developer Basic (Operator)</h4>
+            <span class="ap-email">operator@tenantb.com</span>
+            <p>Snapshot validation only (Process restricted, 3 runs/day).</p>
+          </div>
+
+          <div class="auth-profile-card" onclick="loginWithToken('token-tenant-b-viewer')">
+            <div class="ap-top">
+              <span class="tier-badge basic">BASIC PLAN &bull; FREE</span>
+              <span class="ap-role">VIEWER</span>
+            </div>
+            <h4>Developer Basic (Auditor)</h4>
+            <span class="ap-email">viewer@tenantb.com</span>
+            <p>Read-only audit access for tenant run history.</p>
+          </div>
+        </div>
+
+        <div class="modal-sep"><span>OR SIGN IN WITH CREDENTIALS</span></div>
+
+        <form id="credentialLoginForm" onsubmit="handleCredentialLogin(event, 'modal')">
+          <div class="form-field">
+            <label for="loginEmail">Enterprise Email</label>
+            <input type="email" id="loginEmail" class="apple-form-input" required placeholder="operator@tenanta.com">
+          </div>
+          <div class="form-field">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="apple-form-input" required value="Password123!">
+          </div>
+          <button type="submit" class="apple-btn-primary full-width" style="margin-top: 14px;">
+            Authenticate Enterprise Session →
+          </button>
+        </form>
+      </div>
+
+      <!-- VIEW 2: REGISTER NEW TENANT -->
+      <div id="authViewRegister" style="display: none;">
+        <form id="registerTenantForm" onsubmit="handleTenantRegistration(event)">
+          <div class="form-field">
+            <label for="regOrgName">Company / Organization Name</label>
+            <input type="text" id="regOrgName" class="apple-form-input" required placeholder="e.g. Nexus Cloud Labs">
+          </div>
+          <div class="form-field">
+            <label for="regEmail">Work Email Address</label>
+            <input type="email" id="regEmail" class="apple-form-input" required placeholder="admin@nexuscloud.io">
+          </div>
+          <div class="form-field">
+            <label for="regPassword">Create Master Password</label>
+            <input type="password" id="regPassword" class="apple-form-input" required placeholder="At least 8 characters" value="CloudHealth123!">
+          </div>
+
+          <div class="form-field">
+            <label>Select Subscription Tier</label>
+            <div class="reg-plan-radios">
+              <label class="reg-plan-option">
+                <input type="radio" name="regPlan" value="Ultra">
+                <div class="plan-option-card">
+                  <div class="poc-header">
+                    <strong>Ultra Plan</strong>
+                    <span class="poc-price">₹2,000 / mo</span>
+                  </div>
+                  <span class="poc-desc">100 runs/day cap, unrestricted full engine, zero limits.</span>
+                </div>
+              </label>
+              <label class="reg-plan-option">
+                <input type="radio" name="regPlan" value="Pro" checked>
+                <div class="plan-option-card">
+                  <div class="poc-header">
+                    <strong>Enterprise Pro</strong>
+                    <span class="poc-price">₹500 / mo</span>
+                  </div>
+                  <span class="poc-desc">10 runs/day, full validation &amp; processing engine, priority SLA.</span>
+                </div>
+              </label>
+              <label class="reg-plan-option">
+                <input type="radio" name="regPlan" value="Basic">
+                <div class="plan-option-card">
+                  <div class="poc-header">
+                    <strong>Developer Basic</strong>
+                    <span class="poc-price">Free (₹0)</span>
+                  </div>
+                  <span class="poc-desc">3 runs/day, snapshot validation only, community support.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="apple-btn-primary full-width" style="margin-top: 16px;">
+            Create Organization &amp; Open Console →
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: Executive SLA & Compliance Audit Report
+       ========================================================================= -->
+  <div class="apple-modal-backdrop" id="executiveReportModal" onclick="closeExecutiveReportModalOnBackdrop(event)">
+    <div class="apple-modal-box executive-report-box">
+      <div class="modal-top">
+        <div>
+          <h3>Executive SLA &amp; Compliance Audit Report</h3>
+          <p>Official telemetry verification summary for stakeholder review</p>
+        </div>
+        <div class="modal-top-actions">
+          <button type="button" class="apple-btn-secondary" onclick="printExecutiveReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span>Print / Save PDF</span></button>
+          <button type="button" class="btn-modal-close" onclick="closeExecutiveReportModal()">&times;</button>
+        </div>
+      </div>
+
+      <div class="exec-report-paper" id="execReportPaper">
+        <div class="erp-header">
+          <div>
+            <div class="erp-brand">AetherHealth Enterprise Telemetry</div>
+            <div class="erp-sub">Connection Health &amp; SLA Compliance Certification</div>
+          </div>
+          <div class="erp-meta-right">
+            <div><strong>REPORT ID:</strong> <span id="erpReportId">AUTH-RPT-001</span></div>
+            <div><strong>AUDIT DATE:</strong> <span id="erpDate">2026-10-20</span></div>
+            <div><strong>TIME (UTC):</strong> <span id="erpTime">12:00:00 UTC</span></div>
+          </div>
+        </div>
+
+        <div class="erp-section">
+          <div class="erp-sec-title">TENANT SUBSCRIPTION &amp; RBAC IDENTITY</div>
+          <div class="erp-table">
+            <div class="erp-tr"><span class="erp-td-k">Organization Name:</span><span class="erp-td-v" id="erpOrgName">Nexus Scale Labs</span></div>
+            <div class="erp-tr"><span class="erp-td-k">Tenant Identifier:</span><span class="erp-td-v" id="erpTenantId">tenant-ultra</span></div>
+            <div class="erp-tr"><span class="erp-td-k">Subscribed Tier:</span><span class="erp-td-v" id="erpPlanName">Ultra Plan (100 Runs/Day Cap &bull; ₹2,000/mo)</span></div>
+            <div class="erp-tr"><span class="erp-td-k">Enforced Role:</span><span class="erp-td-v" id="erpRole">Operator (Full Execution Permissions)</span></div>
+          </div>
+        </div>
+
+        <div class="erp-section">
+          <div class="erp-sec-title">SLA ENGINE BENCHMARK SUMMARY</div>
+          <div class="erp-grid-3">
+            <div class="erp-box">
+              <span class="erp-box-k">SLA ADHERENCE RATE</span>
+              <strong class="erp-box-v green" id="erpSlaRate">98.4%</strong>
+              <small>Target: &le; 1000ms threshold</small>
+            </div>
+            <div class="erp-box">
+              <span class="erp-box-k">TOTAL INSPECTED RUNS</span>
+              <strong class="erp-box-v" id="erpTotalRuns">0 Runs</strong>
+              <small>Stored in SQLite WAL</small>
+            </div>
+            <div class="erp-box">
+              <span class="erp-box-k">REPLAY CACHE IMMUNITY</span>
+              <strong class="erp-box-v blue" id="erpReplays">100%</strong>
+              <small>$0 duplicate quota debit</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="erp-section">
+          <div class="erp-sec-title">FORMAL SPECIFICATION COMPLIANCE VERIFICATION</div>
+          <ul class="erp-checklist">
+            <li>✓ <strong>Rules R1–R4 Quality Gate:</strong> All incoming batches verified for unique IDs, valid HTTP codes, non-negative latencies, and strict environments.</li>
+            <li>✓ <strong>Pure Classification Function:</strong> Latency and status codes evaluated without side effects: HEALTHY, SLOW, TIMEOUT (504), RATE_LIMITED (429).</li>
+            <li>✓ <strong>Atomic Concurrency:</strong> Single-statement SQLite WAL lock verified. Zero race-condition overages.</li>
+            <li>✓ <strong>Cross-Tenant Privacy:</strong> Session-derived authorization verified. All cross-tenant queries return strict 404.</li>
+          </ul>
+        </div>
+
+        <div class="erp-signature-block">
+          <div>
+            <div class="erp-sig-line">Automated Cloud Telemetry Certification</div>
+            <small>Advantix Cloud &amp; SaaS Engineering (Revision 2 Specification Contract)</small>
+          </div>
+          <div class="erp-stamp">
+            <span>OFFICIAL AUDIT PASS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: Automated Traffic Simulator & Live Load Generator
+       ========================================================================= -->
+  <div class="apple-modal-backdrop" id="trafficSimulatorModal" onclick="closeTrafficSimulatorModalOnBackdrop(event)">
+    <div class="apple-modal-box traffic-sim-box">
+      <div class="modal-top">
+        <div>
+          <h3>Automated Microservice Traffic Simulator</h3>
+          <p>Generate continuous synthetic load to benchmark SLA compliance and engine throughput</p>
+        </div>
+        <button type="button" class="btn-modal-close" onclick="closeTrafficSimulatorModal()">&times;</button>
+      </div>
+
+      <div class="traffic-sim-content">
+        <!-- Configuration options -->
+        <div class="form-field">
+          <label>TRAFFIC PROFILE SCENARIO</label>
+          <div class="sim-profile-grid">
+            <div class="sim-profile-card active" id="profileCardNormal" onclick="selectSimProfile('normal')">
+              <div class="spc-top">
+                <span class="apple-dot green"></span>
+                <strong>Balanced Production Stream</strong>
+              </div>
+              <p>Simulates standard microservices: 85% fast (&le;100ms), 10% nominal, 5% SLA breach.</p>
+            </div>
+
+            <div class="sim-profile-card" id="profileCardStress" onclick="selectSimProfile('stress')">
+              <div class="spc-top">
+                <span class="apple-dot amber"></span>
+                <strong>High-Latency Stress Spike</strong>
+              </div>
+              <p>Simulates heavy backend pressure with frequent SLA breaches (&gt;1000ms) and timeouts.</p>
+            </div>
+
+            <div class="sim-profile-card" id="profileCardReplay" onclick="selectSimProfile('replay')">
+              <div class="spc-top">
+                <span class="apple-dot purple"></span>
+                <strong>Idempotency Replay Storm</strong>
+              </div>
+              <p>Re-transmits identical payloads with duplicate keys to verify $0 duplicate quota debits.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sim-controls-row">
+          <div class="form-field" style="flex: 1;">
+            <label>NUMBER OF BATCH RUNS</label>
+            <div class="segmented-control mini" style="width: 100%;">
+              <button type="button" class="segment-btn active" id="simCount3" onclick="setSimBatchCount(3)">3 Runs</button>
+              <button type="button" class="segment-btn" id="simCount5" onclick="setSimBatchCount(5)">5 Runs</button>
+              <button type="button" class="segment-btn" id="simCount10" onclick="setSimBatchCount(10)">10 Runs</button>
+            </div>
+          </div>
+          <div class="form-field" style="flex: 1;">
+            <label>INTERVAL BETWEEN CALLS</label>
+            <div class="segmented-control mini" style="width: 100%;">
+              <button type="button" class="segment-btn active" id="simDelayFast" onclick="setSimDelay(350)">350ms (Fast)</button>
+              <button type="button" class="segment-btn" id="simDelayReal" onclick="setSimDelay(800)">800ms (Paced)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Stepper / Progress Bar -->
+        <div class="sim-progress-box" id="simProgressBox" style="display: none;">
+          <div class="spb-header">
+            <span class="spb-title" id="simProgressTitle">Simulating Batch 1 of 3...</span>
+            <span class="spb-rate" id="simProgressPct">33%</span>
+          </div>
+          <div class="spb-track">
+            <div class="spb-fill" id="simProgressFill" style="width: 33%;"></div>
+          </div>
+          <div class="spb-log" id="simProgressLog">
+            <!-- Dynamic stream of completed requests -->
+          </div>
+        </div>
+
+        <div class="modal-actions-bar" style="margin-top: 20px;">
+          <button type="button" class="apple-btn-primary full-width" id="btnStartTrafficSim" onclick="startTrafficSimulation()">
+            Run Traffic Simulation
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aether Intelligence / Gemini SLA Copilot Trigger Button -->
+  <button type="button" id="copilotTriggerBtn" class="copilot-floating-btn" onclick="toggleCopilotDrawer()" title="Open Aether Intelligence Copilot">
+    <div class="copilot-btn-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    </div>
+    <span class="copilot-btn-label">Aether Intelligence</span>
+    <span class="copilot-status-dot online"></span>
+  </button>
+
+  <!-- Aether Intelligence Slide-Out Drawer -->
+  <div id="copilotDrawer" class="copilot-drawer">
+    <div class="copilot-header">
+      <div class="copilot-header-left">
+        <div class="copilot-avatar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div>
+          <h4 class="copilot-title">Aether Intelligence</h4>
+          <span class="copilot-subtitle" id="copilotEngineMode">Gemini SLA &amp; Diagnostics Copilot</span>
+        </div>
+      </div>
+      <div class="copilot-header-actions">
+        <button type="button" class="copilot-icon-btn" onclick="clearCopilotChat()" title="Clear Chat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+        <button type="button" class="copilot-icon-btn" onclick="toggleCopilotDrawer()" title="Close Copilot">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Telemetry Context Bar -->
+    <div class="copilot-context-bar" id="copilotContextBar">
+      <span class="context-pill" id="copilotContextPill">Active Telemetry: Standby</span>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="copilot-messages" id="copilotMessages">
+      <div class="copilot-msg bot">
+        <div class="copilot-bubble">
+          <p>Hello! I am your <strong>UC-03 Architecture &amp; Telemetry Copilot</strong>. I analyze runs in real time, diagnose rule failures (R1–R4), explain SLA thresholds (1000ms), and inspect multi-tenant concurrency safety.</p>
+          <p style="margin-top: 6px; font-size: 0.8rem; color: #64748b;">Choose a quick analysis below or ask any question:</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Analysis Chips -->
+    <div class="copilot-quick-chips">
+      <button type="button" class="copilot-chip" onclick="askCopilotQuick('Explain the current telemetry run')">Explain Current Run</button>
+      <button type="button" class="copilot-chip" onclick="askCopilotQuick('What are rules R1 through R4?')">Rules R1–R4 Invariants</button>
+      <button type="button" class="copilot-chip" onclick="askCopilotQuick('How does the 1000ms latency SLA classification work?')">1000ms SLA Engine</button>
+      <button type="button" class="copilot-chip" onclick="askCopilotQuick('How does the atomic SQL update prevent race conditions?')">Atomic Quota (WAL)</button>
+      <button type="button" class="copilot-chip" onclick="askCopilotQuick('How is cross-tenant access blocked?')">Multi-Tenant Isolation</button>
+    </div>
+
+    <!-- Input Form -->
+    <form class="copilot-input-form" onsubmit="handleCopilotSubmit(event)">
+      <input type="text" id="copilotInput" class="copilot-input" placeholder="Ask Aether Intelligence..." autocomplete="off">
+      <button type="submit" id="copilotSendBtn" class="copilot-send-btn" title="Send message">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
