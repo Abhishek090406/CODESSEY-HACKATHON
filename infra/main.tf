@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.90.0"
+      version = "~> 3.110.0"
     }
   }
 }
@@ -55,6 +55,15 @@ resource "azurerm_container_app" "app" {
       percentage      = 100
       latest_revision = true
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      workload_profile_name,
+      ingress[0].transport,
+      ingress[0].traffic_weight,
+      template[0].http_scale_rule,
+    ]
   }
 }
 
