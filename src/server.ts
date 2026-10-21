@@ -19,10 +19,12 @@ import { validateRecords } from './validator.js';
 import { processConnectionRecords } from './processor.js';
 import { OperationType } from './types.js';
 import { askCopilot } from './copilot.js';
+import { persistReport } from './storage.js';
 
 export function createServer() {
   const app = express();
   const db = getDb();
+  const gitCommit = process.env.COMMIT_SHA || process.env.GIT_COMMIT || 'f074cd4';
 
   // Enforce JSON parsing with 64 KiB body limit per specification
   app.use(express.json({ limit: '64kb' }));
@@ -32,7 +34,11 @@ export function createServer() {
 
   // 1. GET /health - Public, reveals no tenant data
   app.get('/health', (_req: Request, res: Response) => {
-    res.status(200).json({ status: 'ok' });
+    res.status(200).json({
+      status: 'ok',
+      app: 'AetherHealth',
+      commit: gitCommit,
+    });
   });
 
   // System Database Diagnostics - Public health check
@@ -164,7 +170,7 @@ export function createServer() {
   });
 
   // 4. POST /runs - Authenticated, strict ordering of checks
-  app.post('/runs', (req: Request, res: Response) => {
+  app.post('/runs', async (req: Request, res: Response) => {
     const session = req.session!;
 
     // Check Idempotency-Key header
@@ -313,6 +319,7 @@ export function createServer() {
     // Normal processing
     if (operation === 'validate') {
       updateRunTerminal(db, runId, 'Succeeded', validationResult);
+      await persistReport(session.tenant_id, runId, validationResult);
       res.status(201).json({
         run_id: runId,
         status: 'Succeeded',
@@ -321,6 +328,7 @@ export function createServer() {
     } else {
       const processingResult = processConnectionRecords(normalizedRecords);
       updateRunTerminal(db, runId, 'Succeeded', processingResult);
+      await persistReport(session.tenant_id, runId, processingResult);
       res.status(201).json({
         run_id: runId,
         status: 'Succeeded',

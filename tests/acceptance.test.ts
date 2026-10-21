@@ -18,7 +18,9 @@ describe('UC-03 Acceptance Checks (A01 - A11)', () => {
   it('A01: /health is 200 and public', async () => {
     const res = await request(app).get('/health');
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ status: 'ok' });
+    expect(res.body.status).toBe('ok');
+    expect(res.body.app).toBe('AetherHealth');
+    expect(res.body.commit).toBeDefined();
     expect(res.body.tenant_id).toBeUndefined();
   });
 

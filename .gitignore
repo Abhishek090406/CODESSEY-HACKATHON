@@ -11,3 +11,5 @@ dist/
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+reports/
+AZURE_DEPLOYMENT.html

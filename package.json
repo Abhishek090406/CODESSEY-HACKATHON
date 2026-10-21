@@ -11,6 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.34.0",
     "@types/mssql": "^12.3.0",
     "better-sqlite3": "^11.8.1",
     "dotenv": "^16.4.7",
