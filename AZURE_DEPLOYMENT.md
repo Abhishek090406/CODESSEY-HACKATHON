@@ -50,6 +50,9 @@ All infrastructure is provisioned strictly in the `Central India` region under r
 - **Managed Container App ID:** `/subscriptions/0b1fb619-8b2d-4ed5-9da7-972cc66bbff5/resourceGroups/rg-codessey-dev/providers/Microsoft.App/containerApps/uc03-connection-health-dev`
 - **Blob Storage ID:** `https://stcodesseydev0904.blob.core.windows.net/connection-reports-dev`
 
+### Azure Portal Verification Screenshot:
+![Azure Portal - Resource Group rg-codessey-dev](./evidence/azure_resources_portal.png)
+
 ---
 
 ## 4. Test Login Details & Tenant Credentials
