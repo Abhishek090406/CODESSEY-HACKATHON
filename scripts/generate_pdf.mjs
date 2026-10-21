@@ -162,30 +162,29 @@ const htmlContent = `<!DOCTYPE html>
     }
 
     .screenshot-container {
-      margin: 10px 0 14px 0;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
+      margin: 12px 0 16px 0;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      page-break-inside: avoid;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
       background: #ffffff;
-      text-align: center;
+      page-break-inside: avoid;
     }
 
     .screenshot-container img {
-      max-width: 100%;
-      max-height: 240px;
-      object-fit: contain;
-      display: inline-block;
+      width: 100% !important;
+      height: auto !important;
+      display: block !important;
+      image-rendering: -webkit-optimize-contrast;
     }
 
     .screenshot-caption {
-      padding: 5px 10px;
-      font-size: 8pt;
-      color: #64748b;
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      font-weight: 500;
+      padding: 8px 14px;
+      font-size: 8.5pt;
+      color: #334155;
+      background: #f1f5f9;
+      border-top: 1px solid #cbd5e1;
+      font-weight: 600;
       text-align: center;
     }
 
@@ -358,14 +357,15 @@ const htmlContent = `<!DOCTYPE html>
     </tbody>
   </table>
 
-  <h3>Azure Portal Live Deployment Verification</h3>
+  <div style="page-break-before: always;"></div>
+
+  <h2>Azure Portal Live Deployment Verification</h2>
   <div class="screenshot-container">
     <img src="${imageSrc}" alt="Azure Portal Resources">
     <div class="screenshot-caption">
-      Figure 1: Verified Azure Portal view of Resource Group rg-codessey-dev showing active Container App, Storage Account, Log Analytics &amp; CAE Environment.
+      Verified Azure Portal view: Resource Group rg-codessey-dev (Central India) showing Container App (uc03-connection-health-dev), Storage Account (stcodesseydev0904), Log Analytics (law-codessey-dev) &amp; Container Environment (cae-codessey-dev).
     </div>
   </div>
-
 
   <h2>4. Test Login Details & Tenant Credentials</h2>
   <p style="font-size: 9.5pt; color: #475569; margin: 4px 0 10px 0;">
@@ -434,6 +434,8 @@ const htmlContent = `<!DOCTYPE html>
       </tr>
     </tbody>
   </table>
+
+  <div style="page-break-before: always;"></div>
 
   <h2>5. Brief Running & Verification Steps</h2>
 
